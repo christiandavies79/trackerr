@@ -18,7 +18,7 @@ A personal health tracking PWA for monitoring food, exercise, energy levels, and
 
 ```bash
 # Pull and run
-docker run -d -p 8080:80 -v health-data:/data YOUR_DOCKERHUB_USERNAME/health-tracker:latest
+docker run -d -p 8080:80 -v health-data:/data dpooper79/health-tracker:latest
 
 # Or use docker-compose
 docker-compose up -d
