@@ -26,6 +26,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
 COPY backend/app ./app
+COPY backend/alembic ./alembic
+COPY backend/alembic.ini ./alembic.ini
 
 # Copy built frontend
 COPY --from=frontend-builder /app/frontend/dist /var/www/html

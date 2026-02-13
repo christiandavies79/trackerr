@@ -1,10 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, inspect
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 import os
+import logging
+
+from alembic.config import Config
+from alembic import command
 
 from .database import engine, get_db, Base
 from .models import DailyEntry, Meal, Exercise
@@ -12,11 +16,44 @@ from .schemas import (
     DailyEntryCreate, DailyEntryUpdate, DailyEntryResponse,
     MealCreate, MealUpdate, MealResponse,
     ExerciseCreate, ExerciseUpdate, ExerciseResponse,
-    DailyOverview, WeightTrend, EnergyTrend, ExerciseSummary
+    DailyOverview, WeightTrend, EnergyTrend, SleepTrend, ExerciseSummary
 )
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+logger = logging.getLogger(__name__)
+
+
+def run_migrations():
+    """Run Alembic migrations on startup.
+
+    For new databases: creates all tables from scratch via migrations.
+    For existing databases: stamps current state if needed, then upgrades.
+    """
+    alembic_cfg = Config()
+    alembic_cfg.set_main_option("script_location", os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "alembic"
+    ))
+    alembic_cfg.set_main_option(
+        "sqlalchemy.url", str(engine.url)
+    )
+
+    # Check if this is an existing database that predates Alembic
+    inspector = inspect(engine)
+    tables = inspector.get_table_names()
+    has_existing_tables = "daily_entries" in tables
+    has_alembic = "alembic_version" in tables
+
+    if has_existing_tables and not has_alembic:
+        # Existing database without Alembic - stamp it at the initial migration
+        # so only new migrations (like sleep tracking) will run
+        logger.info("Existing database detected, stamping at initial migration")
+        command.stamp(alembic_cfg, "001")
+
+    # Run any pending migrations
+    command.upgrade(alembic_cfg, "head")
+    logger.info("Database migrations complete")
+
+
+run_migrations()
 
 app = FastAPI(title="Health Tracker API", version="1.0.0")
 
@@ -300,6 +337,29 @@ def get_exercise_summary(
             count=r.count
         )
         for r in results
+    ]
+
+
+@app.get("/api/trends/sleep", response_model=List[SleepTrend])
+def get_sleep_trends(
+    days: int = Query(default=30, ge=7, le=365),
+    db: Session = Depends(get_db)
+):
+    start_date = date.today() - timedelta(days=days)
+    entries = db.query(DailyEntry).filter(
+        and_(
+            DailyEntry.date >= start_date,
+            DailyEntry.sleep_hours.isnot(None)
+        )
+    ).order_by(DailyEntry.date.asc()).all()
+
+    return [
+        SleepTrend(
+            date=e.date,
+            sleep_hours=e.sleep_hours,
+            sleep_quality=e.sleep_quality
+        )
+        for e in entries
     ]
 
 

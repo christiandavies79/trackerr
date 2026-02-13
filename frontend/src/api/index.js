@@ -139,3 +139,6 @@ export const getEnergyTrends = (days = 30) =>
 
 export const getExerciseSummary = (days = 30) =>
   fetchAPI(`/trends/exercise?days=${days}`);
+
+export const getSleepTrends = (days = 30) =>
+  fetchAPI(`/trends/sleep?days=${days}`);

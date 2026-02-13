@@ -8,6 +8,8 @@ class DailyEntryBase(BaseModel):
     date: date
     weight_kg: Optional[float] = None
     energy_level: Optional[int] = None  # 1-5
+    sleep_hours: Optional[float] = None
+    sleep_quality: Optional[int] = None  # 1-5 how refreshed
     notes: Optional[str] = None
 
 
@@ -18,6 +20,8 @@ class DailyEntryCreate(DailyEntryBase):
 class DailyEntryUpdate(BaseModel):
     weight_kg: Optional[float] = None
     energy_level: Optional[int] = None
+    sleep_hours: Optional[float] = None
+    sleep_quality: Optional[int] = None
     notes: Optional[str] = None
 
 
@@ -102,6 +106,12 @@ class WeightTrend(BaseModel):
 class EnergyTrend(BaseModel):
     date: date
     energy_level: int
+
+
+class SleepTrend(BaseModel):
+    date: date
+    sleep_hours: Optional[float] = None
+    sleep_quality: Optional[int] = None
 
 
 class ExerciseSummary(BaseModel):

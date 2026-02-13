@@ -18,6 +18,8 @@ class DailyEntry(Base):
     date = Column(Date, unique=True, index=True, nullable=False)
     weight_kg = Column(Float, nullable=True)
     energy_level = Column(Integer, nullable=True)  # 1-5 scale
+    sleep_hours = Column(Float, nullable=True)  # hours of sleep the night before
+    sleep_quality = Column(Integer, nullable=True)  # 1-5 how refreshed you feel
     notes = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())

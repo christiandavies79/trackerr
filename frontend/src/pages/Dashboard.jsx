@@ -5,6 +5,8 @@ import { getDailyOverview, getWeightTrends } from '../api';
 
 const ENERGY_EMOJIS = ['', '😴', '😔', '😐', '🙂', '⚡'];
 const ENERGY_LABELS = ['', 'Exhausted', 'Low', 'Okay', 'Good', 'Great'];
+const SLEEP_QUALITY_LABELS = ['', 'Terrible', 'Poor', 'Fair', 'Good', 'Great'];
+const SLEEP_QUALITY_EMOJIS = ['', '😫', '😴', '😐', '😊', '🌟'];
 
 function Dashboard() {
   const [todayData, setTodayData] = useState(null);
@@ -57,7 +59,7 @@ function Dashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Weight Card */}
         <div className="card">
           <div className="text-gray-400 text-sm mb-1">Weight</div>
@@ -80,6 +82,21 @@ function Dashboard() {
             {todayData?.entry?.energy_level
               ? `${ENERGY_EMOJIS[todayData.entry.energy_level]} ${ENERGY_LABELS[todayData.entry.energy_level]}`
               : '-- Not logged'}
+          </div>
+        </div>
+
+        {/* Sleep Card */}
+        <div className="card">
+          <div className="text-gray-400 text-sm mb-1">Sleep</div>
+          <div className="text-3xl font-bold text-white">
+            {todayData?.entry?.sleep_hours
+              ? `${todayData.entry.sleep_hours}h`
+              : '-- hrs'}
+          </div>
+          <div className="text-gray-500 text-sm mt-1">
+            {todayData?.entry?.sleep_quality
+              ? `${SLEEP_QUALITY_EMOJIS[todayData.entry.sleep_quality]} ${SLEEP_QUALITY_LABELS[todayData.entry.sleep_quality]}`
+              : 'Not logged'}
           </div>
         </div>
 

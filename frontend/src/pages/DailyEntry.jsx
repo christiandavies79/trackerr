@@ -18,6 +18,14 @@ const ENERGY_LEVELS = [
   { level: 5, emoji: '(energetic)', label: 'Great', color: 'border-emerald-500 bg-emerald-500/20' },
 ];
 
+const SLEEP_QUALITY_LEVELS = [
+  { level: 1, label: 'Terrible', color: 'border-red-500 bg-red-500/20' },
+  { level: 2, label: 'Poor', color: 'border-orange-500 bg-orange-500/20' },
+  { level: 3, label: 'Fair', color: 'border-yellow-500 bg-yellow-500/20' },
+  { level: 4, label: 'Good', color: 'border-green-500 bg-green-500/20' },
+  { level: 5, label: 'Great', color: 'border-emerald-500 bg-emerald-500/20' },
+];
+
 const EXERCISE_CATEGORIES = [
   { id: 'weights', label: 'Weights', color: 'bg-purple-600' },
   { id: 'cardio', label: 'Cardio', color: 'bg-red-600' },
@@ -37,6 +45,8 @@ function DailyEntry() {
   // Form state
   const [weight, setWeight] = useState('');
   const [energyLevel, setEnergyLevel] = useState(null);
+  const [sleepHours, setSleepHours] = useState('');
+  const [sleepQuality, setSleepQuality] = useState(null);
   const [notes, setNotes] = useState('');
   const [meals, setMeals] = useState([]);
   const [exercises, setExercises] = useState([]);
@@ -59,10 +69,14 @@ function DailyEntry() {
       if (data.entry) {
         setWeight(data.entry.weight_kg?.toString() || '');
         setEnergyLevel(data.entry.energy_level);
+        setSleepHours(data.entry.sleep_hours?.toString() || '');
+        setSleepQuality(data.entry.sleep_quality);
         setNotes(data.entry.notes || '');
       } else {
         setWeight('');
         setEnergyLevel(null);
+        setSleepHours('');
+        setSleepQuality(null);
         setNotes('');
       }
       setMeals(data.meals || []);
@@ -71,6 +85,8 @@ function DailyEntry() {
       console.error('Failed to load day data:', error);
       setWeight('');
       setEnergyLevel(null);
+      setSleepHours('');
+      setSleepQuality(null);
       setNotes('');
       setMeals([]);
       setExercises([]);
@@ -85,6 +101,8 @@ function DailyEntry() {
       await updateEntry(selectedDate, {
         weight_kg: weight ? parseFloat(weight) : null,
         energy_level: energyLevel,
+        sleep_hours: sleepHours ? parseFloat(sleepHours) : null,
+        sleep_quality: sleepQuality,
         notes: notes || null,
       });
     } catch (error) {
@@ -212,6 +230,57 @@ function DailyEntry() {
             {ENERGY_LEVELS.find((e) => e.level === energyLevel)?.label}
           </p>
         )}
+      </div>
+
+      {/* Sleep */}
+      <div className="card">
+        <h2 className="text-xl font-semibold text-white mb-4">Sleep (night before)</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="label block mb-2">Hours of Sleep</label>
+            <div className="flex items-center space-x-4">
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                max="24"
+                placeholder="Hours"
+                value={sleepHours}
+                onChange={(e) => setSleepHours(e.target.value)}
+                onBlur={saveEntry}
+                className="input w-40"
+              />
+              <span className="text-gray-400">hours</span>
+            </div>
+          </div>
+          <div>
+            <label className="label block mb-2">How refreshed do you feel?</label>
+            <div className="flex flex-wrap gap-3">
+              {SLEEP_QUALITY_LEVELS.map(({ level, label, color }) => (
+                <button
+                  key={level}
+                  onClick={() => {
+                    setSleepQuality(level);
+                    setTimeout(saveEntry, 0);
+                  }}
+                  className={`energy-btn ${
+                    sleepQuality === level
+                      ? color
+                      : 'border-gray-600 hover:border-gray-500'
+                  }`}
+                  title={label}
+                >
+                  <span className="text-xs">{level}</span>
+                </button>
+              ))}
+            </div>
+            {sleepQuality && (
+              <p className="text-gray-400 mt-2">
+                {SLEEP_QUALITY_LEVELS.find((s) => s.level === sleepQuality)?.label}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Meals */}
