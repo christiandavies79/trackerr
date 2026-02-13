@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  health-tracker:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - health-data:/data
+    restart: unless-stopped
+
+volumes:
+  health-data:
