@@ -2,6 +2,7 @@ import { Routes, Route, NavLink } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import DailyEntry from './pages/DailyEntry';
 import Trends from './pages/Trends';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
                   isActive ? 'nav-link-active' : 'nav-link'
                 }
               >
-                Log Entry
+                Log
               </NavLink>
               <NavLink
                 to="/trends"
@@ -38,6 +39,14 @@ function App() {
                 }
               >
                 Trends
+              </NavLink>
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  isActive ? 'nav-link-active' : 'nav-link'
+                }
+              >
+                Settings
               </NavLink>
             </div>
           </div>
@@ -51,6 +60,7 @@ function App() {
           <Route path="/entry" element={<DailyEntry />} />
           <Route path="/entry/:date" element={<DailyEntry />} />
           <Route path="/trends" element={<Trends />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>
     </div>

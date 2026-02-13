@@ -1,7 +1,29 @@
-const API_BASE = '/api';
+const STORAGE_KEY = 'health-tracker-server-url';
+
+// Get the configured server URL, or empty string for relative URLs
+export function getServerUrl() {
+  return localStorage.getItem(STORAGE_KEY) || '';
+}
+
+export function setServerUrl(url) {
+  if (url) {
+    // Normalize: remove trailing slash
+    const normalized = url.replace(/\/+$/, '');
+    localStorage.setItem(STORAGE_KEY, normalized);
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+export function getApiBase() {
+  const serverUrl = getServerUrl();
+  return serverUrl ? `${serverUrl}/api` : '/api';
+}
 
 async function fetchAPI(endpoint, options = {}) {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+  const apiBase = getApiBase();
+
+  const response = await fetch(`${apiBase}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -19,6 +41,20 @@ async function fetchAPI(endpoint, options = {}) {
   }
 
   return response.json();
+}
+
+// Test connection to server
+export async function testConnection(serverUrl) {
+  const apiBase = serverUrl ? `${serverUrl}/api` : '/api';
+  try {
+    const response = await fetch(`${apiBase}/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 // Daily Entries
