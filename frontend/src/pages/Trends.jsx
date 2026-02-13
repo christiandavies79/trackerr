@@ -14,7 +14,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { getWeightTrends, getEnergyTrends, getExerciseSummary } from '../api';
+import { getWeightTrends, getEnergyTrends, getSleepTrends, getExerciseSummary } from '../api';
 
 const TIME_RANGES = [
   { value: 7, label: '7 days' },
@@ -34,6 +34,7 @@ function Trends() {
   const [days, setDays] = useState(30);
   const [weightData, setWeightData] = useState([]);
   const [energyData, setEnergyData] = useState([]);
+  const [sleepData, setSleepData] = useState([]);
   const [exerciseData, setExerciseData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,9 +45,10 @@ function Trends() {
   async function loadTrends() {
     setLoading(true);
     try {
-      const [weights, energy, exercises] = await Promise.all([
+      const [weights, energy, sleep, exercises] = await Promise.all([
         getWeightTrends(days).catch(() => []),
         getEnergyTrends(days).catch(() => []),
+        getSleepTrends(days).catch(() => []),
         getExerciseSummary(days).catch(() => []),
       ]);
 
@@ -61,6 +63,13 @@ function Trends() {
         energy.map((e) => ({
           ...e,
           dateStr: format(parseISO(e.date), 'MMM d'),
+        }))
+      );
+
+      setSleepData(
+        sleep.map((s) => ({
+          ...s,
+          dateStr: format(parseISO(s.date), 'MMM d'),
         }))
       );
 
@@ -84,6 +93,14 @@ function Trends() {
   // Calculate energy stats
   const energyStats = energyData.length > 0 ? {
     average: (energyData.reduce((sum, e) => sum + e.energy_level, 0) / energyData.length).toFixed(1),
+  } : null;
+
+  // Calculate sleep stats
+  const sleepStats = sleepData.length > 0 ? {
+    average: (sleepData.reduce((sum, s) => sum + s.sleep_hours, 0) / sleepData.length).toFixed(1),
+    avgQuality: sleepData.filter(s => s.sleep_quality).length > 0
+      ? (sleepData.filter(s => s.sleep_quality).reduce((sum, s) => sum + s.sleep_quality, 0) / sleepData.filter(s => s.sleep_quality).length).toFixed(1)
+      : null,
   } : null;
 
   // Calculate total exercise time
@@ -229,6 +246,58 @@ function Trends() {
           </ResponsiveContainer>
         ) : (
           <p className="text-gray-500 py-8 text-center">No energy data recorded</p>
+        )}
+      </div>
+
+      {/* Sleep Chart */}
+      <div className="card">
+        <h2 className="text-xl font-semibold text-white mb-2">Sleep</h2>
+        {sleepStats && (
+          <div className="flex gap-6 mb-4 text-sm">
+            <div>
+              <span className="text-gray-400">Avg hours:</span>{' '}
+              <span className="text-white font-medium">{sleepStats.average}h</span>
+            </div>
+            {sleepStats.avgQuality && (
+              <div>
+                <span className="text-gray-400">Avg quality:</span>{' '}
+                <span className="text-white font-medium">{sleepStats.avgQuality} / 5</span>
+              </div>
+            )}
+          </div>
+        )}
+        {sleepData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={sleepData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis
+                dataKey="dateStr"
+                stroke="#9ca3af"
+                tick={{ fill: '#9ca3af', fontSize: 12 }}
+              />
+              <YAxis
+                stroke="#9ca3af"
+                tick={{ fill: '#9ca3af', fontSize: 12 }}
+                domain={[0, 12]}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
+                  borderRadius: '8px',
+                }}
+                labelStyle={{ color: '#9ca3af' }}
+              />
+              <Bar
+                dataKey="sleep_hours"
+                name="Hours"
+                fill="#8b5cf6"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-gray-500 py-8 text-center">No sleep data recorded</p>
         )}
       </div>
 
