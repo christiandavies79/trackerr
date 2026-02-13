@@ -6,9 +6,9 @@ from datetime import date, datetime, timedelta
 from typing import List, Optional
 import os
 
-from database import engine, get_db, Base
-from models import DailyEntry, Meal, Exercise
-from schemas import (
+from .database import engine, get_db, Base
+from .models import DailyEntry, Meal, Exercise
+from .schemas import (
     DailyEntryCreate, DailyEntryUpdate, DailyEntryResponse,
     MealCreate, MealUpdate, MealResponse,
     ExerciseCreate, ExerciseUpdate, ExerciseResponse,
