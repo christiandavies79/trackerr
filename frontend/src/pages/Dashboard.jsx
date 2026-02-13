@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { format, subDays, parseISO } from 'date-fns';
 import { getDailyOverview, getWeightTrends } from '../api';
 
-const ENERGY_EMOJIS = ['', '(tired)', '(low)', '(okay)', '(good)', '(great)'];
+const ENERGY_EMOJIS = ['', '😴', '😔', '😐', '🙂', '⚡'];
 const ENERGY_LABELS = ['', 'Exhausted', 'Low', 'Okay', 'Good', 'Great'];
 
 function Dashboard() {
