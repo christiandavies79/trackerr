@@ -208,20 +208,42 @@ def get_daily_overview(overview_date: date, db: Session = Depends(get_db)):
     meals = db.query(Meal).filter(Meal.date == overview_date).order_by(Meal.time.asc()).all()
     exercises = db.query(Exercise).filter(Exercise.date == overview_date).all()
 
-    # Calculate fasting hours
+    # Calculate fasting hours: gap from previous meal to first meal of this day
     fasting_hours = None
-    if len(meals) >= 2:
-        first_meal = meals[0].time
-        last_meal = meals[-1].time
-        eating_window = (last_meal - first_meal).total_seconds() / 3600
-        fasting_hours = round(24 - eating_window, 1)
+    is_currently_fasting = False
+    last_meal_time = None
+
+    if len(meals) > 0:
+        # Meals eaten today - calculate completed fast
+        first_meal_today = meals[0].time
+
+        # Find the most recent meal BEFORE this first meal (could be yesterday or earlier)
+        previous_meal = db.query(Meal).filter(
+            Meal.time < first_meal_today
+        ).order_by(Meal.time.desc()).first()
+
+        if previous_meal:
+            fasting_delta = first_meal_today - previous_meal.time
+            fasting_hours = round(fasting_delta.total_seconds() / 3600, 1)
+            last_meal_time = previous_meal.time
+    else:
+        # No meals today yet - currently fasting
+        is_currently_fasting = True
+        last_meal = db.query(Meal).order_by(Meal.time.desc()).first()
+        if last_meal:
+            now = datetime.now()
+            fasting_delta = now - last_meal.time
+            fasting_hours = round(fasting_delta.total_seconds() / 3600, 1)
+            last_meal_time = last_meal.time
 
     return DailyOverview(
         date=overview_date,
         entry=entry,
         meals=meals,
         exercises=exercises,
-        fasting_hours=fasting_hours
+        fasting_hours=fasting_hours,
+        is_currently_fasting=is_currently_fasting,
+        last_meal_time=last_meal_time
     )
 
 

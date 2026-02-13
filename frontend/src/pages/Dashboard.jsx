@@ -85,17 +85,21 @@ function Dashboard() {
 
         {/* Fasting Card */}
         <div className="card">
-          <div className="text-gray-400 text-sm mb-1">Fasting Window</div>
+          <div className="text-gray-400 text-sm mb-1">
+            {todayData?.is_currently_fasting ? 'Current Fast' : 'Fasted'}
+          </div>
           <div className="text-3xl font-bold text-white">
             {todayData?.fasting_hours
               ? `${todayData.fasting_hours}h`
               : '-- hrs'}
           </div>
-          {todayData?.meals?.length > 0 && (
-            <div className="text-gray-500 text-sm mt-1">
-              {todayData.meals.length} meal{todayData.meals.length > 1 ? 's' : ''} logged
-            </div>
-          )}
+          <div className="text-gray-500 text-sm mt-1">
+            {todayData?.is_currently_fasting
+              ? 'Still fasting...'
+              : todayData?.meals?.length > 0
+                ? `Broke fast at ${format(parseISO(todayData.meals[0].time), 'HH:mm')}`
+                : 'No meals logged'}
+          </div>
         </div>
       </div>
 

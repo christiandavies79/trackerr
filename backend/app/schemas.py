@@ -89,6 +89,8 @@ class DailyOverview(BaseModel):
     meals: List[MealResponse] = []
     exercises: List[ExerciseResponse] = []
     fasting_hours: Optional[float] = None
+    is_currently_fasting: bool = False  # True if no meals eaten today yet
+    last_meal_time: Optional[datetime] = None  # When the previous meal was eaten
 
 
 # Trends
