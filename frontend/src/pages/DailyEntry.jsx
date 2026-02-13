@@ -95,14 +95,14 @@ function DailyEntry() {
     }
   }
 
-  async function saveEntry() {
+  async function saveEntry(overrides = {}) {
     setSaving(true);
     try {
       await updateEntry(selectedDate, {
         weight_kg: weight ? parseFloat(weight) : null,
-        energy_level: energyLevel,
+        energy_level: overrides.energy_level !== undefined ? overrides.energy_level : energyLevel,
         sleep_hours: sleepHours ? parseFloat(sleepHours) : null,
-        sleep_quality: sleepQuality,
+        sleep_quality: overrides.sleep_quality !== undefined ? overrides.sleep_quality : sleepQuality,
         notes: notes || null,
       });
     } catch (error) {
@@ -212,7 +212,7 @@ function DailyEntry() {
               key={level}
               onClick={() => {
                 setEnergyLevel(level);
-                setTimeout(saveEntry, 0);
+                saveEntry({ energy_level: level });
               }}
               className={`energy-btn ${
                 energyLevel === level
@@ -261,7 +261,7 @@ function DailyEntry() {
                   key={level}
                   onClick={() => {
                     setSleepQuality(level);
-                    setTimeout(saveEntry, 0);
+                    saveEntry({ sleep_quality: level });
                   }}
                   className={`energy-btn ${
                     sleepQuality === level
